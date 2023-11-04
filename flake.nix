@@ -48,6 +48,12 @@
               cargo
               rustc
             ];
+            nativeBuildInputs = [ pkg-config ];
+
+            buildInputs = [ openssl libiconv ] ++ (if system == "darwin" then
+              [ darwin.apple_sdk.frameworks.Security ]
+            else
+              [ ]);
             RUST_SRC_PATH = rustPlatform.rustLibSrc;
           };
       });
