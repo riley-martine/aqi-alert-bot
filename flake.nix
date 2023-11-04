@@ -19,6 +19,8 @@
         naersk-lib = pkgs.callPackage naersk { };
       in {
         defaultPackage = naersk-lib.buildPackage ./.;
+        # nativeBuildInputs = with pkgs; [ pkg-config ];
+        # buildInputs = [ openssl libiconv ];
 
         checks = {
           pre-commit-check = pre-commit-hooks.lib.${system}.run {
@@ -42,8 +44,6 @@
               cargo
               rustc
             ];
-            # nativeBuildInputs = with pkgs; [ pkg-config ];
-            # buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy openssl libiconv ];
             RUST_SRC_PATH = rustPlatform.rustLibSrc;
           };
       });
