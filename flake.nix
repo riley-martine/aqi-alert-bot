@@ -19,8 +19,8 @@
         naersk-lib = pkgs.callPackage naersk { };
       in {
         defaultPackage = naersk-lib.buildPackage ./.;
-        # nativeBuildInputs = with pkgs; [ pkg-config ];
         # buildInputs = [ openssl libiconv ];
+        # nativeBuildInputs = with pkgs; [ pkg-config ];
 
         checks = {
           pre-commit-check = pre-commit-hooks.lib.${system}.run {
