@@ -18,8 +18,10 @@
         pkgs = import nixpkgs { inherit system; };
         naersk-lib = pkgs.callPackage naersk { };
       in {
-        defaultPackage = naersk-lib.buildPackage ./.;
-        # nativeBuildInputs = with pkgs; [ pkg-config ];
+        defaultPackage = naersk-lib.buildPackage {
+          src = ./.;
+          nativeBuildInputs = with pkgs; [ pkg-config ];
+        };
         # buildInputs = [ openssl libiconv ];
 
         checks = {
