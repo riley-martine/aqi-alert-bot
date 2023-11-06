@@ -15,13 +15,20 @@
   outputs = { self, nixpkgs, utils, naersk, pre-commit-hooks }:
     utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs { inherit system; };
-        naersk-lib = pkgs.callPackage naersk { };
+        pkgs = (import nixpkgs) { inherit system; };
+        naersk' = pkgs.callPackage naersk { };
+        libs = with pkgs;
+          [ openssl ] ++ lib.optionals stdenv.isDarwin [
+            libiconv
+            darwin.apple_sdk.frameworks.SystemConfiguration
+          ];
       in {
-        defaultPackage = naersk-lib.buildPackage {
-          src = ./.;
-          nativeBuildInputs = with pkgs; [ pkg-config ];
-          buildInputs = with pkgs; [ openssl ];
+        packages = {
+          default = naersk'.buildPackage {
+            src = ./.;
+            nativeBuildInputs = with pkgs; [ pkg-config ];
+            buildInputs = libs;
+          };
         };
 
         checks = {
@@ -31,7 +38,6 @@
               nixfmt.enable = true;
               rustfmt.enable = true;
               cargo-check.enable = true;
-              clippy.enable = true;
             };
           };
         };
@@ -40,20 +46,16 @@
           mkShell {
             inherit (self.checks.${system}.pre-commit-check) shellHook;
             packages = [
-              nixfmt
+              rustc
+              cargo
               rustfmt
               rustPackages.clippy
+              nixfmt
               rust-analyzer
               pre-commit
-              cargo
-              rustc
-            ];
-            nativeBuildInputs = [ pkg-config ];
+              direnv
+            ] ++ libs;
 
-            buildInputs = [ openssl libiconv ] ++ (if system == "darwin" then
-              [ darwin.apple_sdk.frameworks.Security ]
-            else
-              [ ]);
             RUST_SRC_PATH = rustPlatform.rustLibSrc;
           };
       });
